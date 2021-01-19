@@ -47,12 +47,11 @@ pollsRouter
 
 pollsRouter
   .route('/:id')
-  .all(checkPollExists)
-  .get((req, res, next) => {
+  .get(checkPollExists, (req, res, next) => {
     res.json(PollsService.serializePoll(res.poll));
   })
 
-  .patch(requireAuth, checkPollBelongsToUser, jsonBodyParser, (req, res, next) => {
+  .patch(requireAuth, checkPollExists, checkPollBelongsToUser, jsonBodyParser, (req, res, next) => {
     const { poll_name, end_time } = req.body;
     const updateFields = { poll_name, end_time };
     const numFields = Object.values(updateFields).filter(Boolean).length;
@@ -71,7 +70,7 @@ pollsRouter
       .catch(next);
   })
 
-  .delete(requireAuth, checkPollBelongsToUser, (req, res, next) => {
+  .delete(requireAuth, checkPollExists, checkPollBelongsToUser, (req, res, next) => {
     PollsService.deletePoll(
       req.app.get('db'),
       req.params.id

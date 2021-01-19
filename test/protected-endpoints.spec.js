@@ -36,6 +36,21 @@ describe('Protected Endpoints', () => {
       path: '/api/users',
       method: supertest(app).get
     },
+    {
+      name: 'GET /api/polls',
+      path: '/api/polls',
+      method: supertest(app).get
+    },
+    {
+      name: 'PATCH /api/polls/:id',
+      path: '/api/polls/1',
+      method: supertest(app).patch
+    },
+    {
+      name: 'DELETE /api/polls/:id',
+      path: '/api/polls/1',
+      method: supertest(app).delete
+    },
   ];
 
   protectedEndpoints.forEach(endpoint => {
