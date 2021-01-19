@@ -1,7 +1,9 @@
 BEGIN;
 
 TRUNCATE
-  whatsforlunch_users
+  whatsforlunch_users,
+  whatsforlunch_polls,
+  whatsforlunch_poll_items
   RESTART IDENTITY CASCADE;
 
 INSERT INTO whatsforlunch_users (
