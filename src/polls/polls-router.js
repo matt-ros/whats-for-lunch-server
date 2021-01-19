@@ -102,7 +102,7 @@ async function checkPollExists(req, res, next) {
 async function checkPollBelongsToUser(req, res, next) {
   if (res.poll.user_id !== req.user.id) {
     return res.status(403).json({
-      error: 'List belongs to a different user'
+      error: 'Poll belongs to a different user'
     });
   }
   next();

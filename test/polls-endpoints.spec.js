@@ -198,5 +198,143 @@ describe('Polls Endpoints', () => {
     });
   });
 
-  
-})
+  describe('PATCH /api/polls/:id', () => {
+    context('Given no polls', () => {
+      beforeEach('insert users', () => helpers.seedUsers(db, testUsers));
+
+      it('responds with 404', () => {
+        const pollId = 123456;
+        return supertest(app)
+          .patch(`/api/polls/${pollId}`)
+          .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
+          .expect(404, { error: `Poll doesn't exist` });
+      });
+    });
+
+    context('Given there are polls in the database', () => {
+      beforeEach('seed tables', () =>
+        helpers.seedWhatsForLunchTables(
+          db,
+          testUsers,
+          testPolls
+        )
+      );
+
+      it('responds 204 and updates poll', () => {
+        const pollToUpdate = testPolls[0];
+        const updateFields = {
+          poll_name: 'updated poll name',
+          end_time: '2020-01-22T16:28:32.615Z'
+        };
+        const expectedPoll = {
+          ...pollToUpdate,
+          ...updateFields
+        };
+        return supertest(app)
+          .patch(`/api/polls/${pollToUpdate.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
+          .send(updateFields)
+          .expect(204)
+          .then(res =>
+            supertest(app)
+              .get(`/api/polls/${pollToUpdate.id}`)
+              .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
+              .expect(expectedPoll)
+          );
+      });
+
+      it('responds with 403 Forbidden if poll belongs to different user', () => {
+        const pollId = testPolls[0].id;
+        const wrongUser = testUsers.find(user => user.id !== testPolls[0].user_id);
+        return supertest(app)
+          .patch(`/api/polls/${pollId}`)
+          .set('Authorization', helpers.makeAuthHeader(wrongUser))
+          .send({ poll_name: 'this request will fail' })
+          .expect(403, { error: 'Poll belongs to a different user' });
+      });
+
+      it('responds with 400 when no required fields supplied', () => {
+        const idToUpdate = testPolls[0].id;
+        return supertest(app)
+          .patch(`/api/polls/${idToUpdate}`)
+          .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
+          .send({ irrelevantField: 'foo' })
+          .expect(400, { error: `Request body must contain 'poll_name' or 'end_time'` });
+      });
+
+      it('responds 204 when updating only a subset of fields', () => {
+        const pollToUpdate = testPolls[0];
+        const updateFields = {
+          poll_name: 'Updated poll_name'
+        };
+        const expectedPoll = {
+          ...pollToUpdate,
+          ...updateFields
+        };
+        return supertest(app)
+          .patch(`/api/polls/${pollToUpdate.id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
+          .send({
+            ...updateFields,
+            fieldToIgnore: 'should not be in GET response'
+          })
+          .expect(204)
+          .then(res =>
+            supertest(app)  
+              .get(`/api/polls/${pollToUpdate.id}`)
+              .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
+              .expect(expectedPoll)
+          );
+      });
+    });
+  });
+
+  describe('DELETE /api/polls/:id', () => {
+    context('Given no polls', () => {
+      beforeEach('insert users', () => helpers.seedUsers(db, testUsers));
+
+      it('responds with 404', () => {
+        const pollId = 123456;
+        return supertest(app)
+          .delete(`/api/polls/${pollId}`)
+          .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
+          .expect(404, { error: `Poll doesn't exist` });
+      });
+    });
+
+    context('Given there are polls in the database', () => {
+      beforeEach('seed tables', () =>
+        helpers.seedWhatsForLunchTables(
+          db,
+          testUsers,
+          testPolls
+        )
+      );
+
+      it('responds 204 and removes the poll', () => {
+        const pollToRemove = testPolls[2];
+        const user = testUsers.find(user => user.id === pollToRemove.user_id);
+        const expectedPolls = testPolls.filter(poll => poll.user_id === user.id && poll.id !== pollToRemove.id);
+        return supertest(app)
+          .delete(`/api/polls/${pollToRemove.id}`)
+          .set('Authorization', helpers.makeAuthHeader(user))
+          .expect(204)
+          .then(res =>
+            supertest(app)  
+              .get('/api/polls')
+              .set('Authorization', helpers.makeAuthHeader(user))
+              .expect(expectedPolls)
+          );
+      });
+
+      it('responds with 403 Forbidden if poll belongs to a different user', () => {
+        const pollId = testPolls[0].id;
+        const wrongUser = testUsers.find(user => user.id !== testPolls[0].user_id);
+        return supertest(app)
+          .delete(`/api/polls/${pollId}`)
+          .set('Authorization', helpers.makeAuthHeader(wrongUser))
+          .expect(403, { error: 'Poll belongs to a different user' });
+      });
+    });
+  });
+});
