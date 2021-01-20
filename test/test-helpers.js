@@ -67,17 +67,104 @@ function makePollsArray(users) {
   ];
 }
 
+function makePollItemsArray(polls) {
+  return [
+    {
+      id: 1,
+      item_name: 'test item 1',
+      item_address: 'test item address 1',
+      item_cuisine: 'test item cuisine 1',
+      item_link: 'test item link 1',
+      item_votes: 3,
+      date_created: '2029-01-22T16:28:32.615Z',
+      poll_id: polls[0].id
+    },
+    {
+      id: 2,
+      item_name: 'test item 2',
+      item_address: 'test item address 2',
+      item_cuisine: 'test item cuisine 2',
+      item_link: 'test item link 2',
+      item_votes: 2,
+      date_created: '2029-01-22T16:28:32.615Z',
+      poll_id: polls[0].id
+    },
+    {
+      id: 3,
+      item_name: 'test item 3',
+      item_address: 'test item address 3',
+      item_cuisine: 'test item cuisine 3',
+      item_link: 'test item link 3',
+      item_votes: 0,
+      date_created: '2029-01-22T16:28:32.615Z',
+      poll_id: polls[1].id
+    },
+    {
+      id: 4,
+      item_name: 'test item 4',
+      item_address: 'test item address 4',
+      item_cuisine: 'test item cuisine 4',
+      item_link: 'test item link 4',
+      item_votes: 4,
+      date_created: '2029-01-22T16:28:32.615Z',
+      poll_id: polls[1].id
+    },
+    {
+      id: 5,
+      item_name: 'test item 5',
+      item_address: 'test item address 5',
+      item_cuisine: 'test item cuisine 5',
+      item_link: 'test item link 5',
+      item_votes: 6,
+      date_created: '2029-01-22T16:28:32.615Z',
+      poll_id: polls[2].id
+    },
+    {
+      id: 6,
+      item_name: 'test item 6',
+      item_address: 'test item address 6',
+      item_cuisine: 'test item cuisine 6',
+      item_link: 'test item link 6',
+      item_votes: 1,
+      date_created: '2029-01-22T16:28:32.615Z',
+      poll_id: polls[2].id
+    },
+    {
+      id: 7,
+      item_name: 'test item 7',
+      item_address: 'test item address 7',
+      item_cuisine: 'test item cuisine 7',
+      item_link: 'test item link 7',
+      item_votes: 3,
+      date_created: '2029-01-22T16:28:32.615Z',
+      poll_id: polls[3].id
+    },
+    {
+      id: 8,
+      item_name: 'test item 8',
+      item_address: 'test item address 8',
+      item_cuisine: 'test item cuisine 8',
+      item_link: 'test item link 8',
+      item_votes: 2,
+      date_created: '2029-01-22T16:28:32.615Z',
+      poll_id: polls[3].id
+    },
+  ];
+}
+
 function makeWhatsForLunchFixtures() {
   const testUsers = makeUsersArray();
   const testPolls = makePollsArray(testUsers);
-  return { testUsers, testPolls };
+  const testPollItems = makePollItemsArray(testPolls);
+  return { testUsers, testPolls, testPollItems };
 }
 
 function cleanTables(db) {
   return db.raw(
     `TRUNCATE
       whatsforlunch_users,
-      whatsforlunch_polls
+      whatsforlunch_polls,
+      whatsforlunch_poll_items
       RESTART IDENTITY CASCADE`
   );
 }
@@ -97,7 +184,7 @@ function seedUsers(db, users) {
     );
 }
 
-function seedWhatsForLunchTables(db, users, polls = []) { // add other tables as created
+function seedWhatsForLunchTables(db, users, polls = [], pollItems = []) { // add other tables as created
   // use a transaction to group queries and auto rollback on failure
   return db.transaction(async trx => {
     await seedUsers(trx, users);
@@ -108,6 +195,14 @@ function seedWhatsForLunchTables(db, users, polls = []) { // add other tables as
       await trx.raw(
         `SELECT setval('whatsforlunch_polls_id_seq', ?)`,
         [polls[polls.length - 1].id]
+      )
+    }
+    if (pollItems.length) {
+      await trx.into('whatsforlunch_poll_items').insert(pollItems)
+      // update auto sequence to match forced id values
+      await trx.raw(
+        `SELECT setval('whatsforlunch_poll_items_id_seq', ?)`,
+        [pollItems[pollItems.length - 1].id]
       )
     }
   });
@@ -158,6 +253,29 @@ function makeMaliciousPoll(user) {
   };
 }
 
+function makeMaliciousPollItem(poll) {
+  const maliciousPollItem = {
+    id: 911,
+    item_name: 'Naughty naughty very naughty <script>alert("xss");</script>',
+    item_address: 'Naughty naughty very naughty <script>alert("xss");</script>',
+    item_cuisine: 'Naughty naughty very naughty <script>alert("xss");</script>',
+    item_link: `Bad image <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">. But not <strong>all</strong> bad.`,
+    item_votes: 10,
+    poll_id: poll.id
+  };
+  const expectedPollItem = {
+    ...maliciousPollItem,
+    item_name: 'Naughty naughty very naughty &lt;script&gt;alert(\"xss\");&lt;/script&gt;',
+    item_address: 'Naughty naughty very naughty &lt;script&gt;alert(\"xss\");&lt;/script&gt;',
+    item_cuisine: 'Naughty naughty very naughty &lt;script&gt;alert(\"xss\");&lt;/script&gt;',
+    item_link: `Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.`
+  };
+  return {
+    maliciousPollItem,
+    expectedPollItem
+  };
+}
+
 function seedMaliciousUser(db, user) {
   return db.into('whatsforlunch_users').insert(user);
 }
@@ -171,9 +289,14 @@ function seedMaliciousPoll(db, user, poll) {
     );
 }
 
+function seedMaliciousPollItem(db, user, poll, pollItem) {
+  return seedWhatsForLunchTables(db, [user], [poll], [pollItem]);
+}
+
 module.exports = {
   makeUsersArray,
   makePollsArray,
+  makePollItemsArray,
   makeWhatsForLunchFixtures,
   cleanTables,
   seedUsers,
@@ -181,6 +304,8 @@ module.exports = {
   makeAuthHeader,
   makeMaliciousUser,
   makeMaliciousPoll,
+  makeMaliciousPollItem,
   seedMaliciousUser,
   seedMaliciousPoll,
+  seedMaliciousPollItem,
 }

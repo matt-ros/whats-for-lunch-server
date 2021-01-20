@@ -7,6 +7,7 @@ const { NODE_ENV, CLIENT_ORIGIN } = require('./config');
 const authRouter = require('./auth/auth-router');
 const usersRouter = require('./users/users-router');
 const pollsRouter = require('./polls/polls-router');
+const pollItemsRouter = require('./poll-items/poll-items-router');
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use(
 app.use('/api/auth', authRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/polls', pollsRouter);
+app.use('/api/items', pollItemsRouter);
 
 app.use(function errorHandler(error, req, res, next) {
   let response;
