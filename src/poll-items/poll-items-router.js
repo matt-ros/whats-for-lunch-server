@@ -21,31 +21,35 @@ pollItemsRouter
   })
 
   .post(checkIfLoggedIn, checkPollBelongsToUser, jsonBodyParser, (req, res, next) => {
-    const { item_name, item_address, item_cuisine, item_link, item_votes } = req.body;
-    if (!item_name) {
-      return res.status(400).json({
-        error: `Missing 'item_name' in request body`
-      });
+    const newItems = req.body;
+    for (let i = 0; i < newItems.length; i++) {
+      const { item_name, item_address, item_cuisine, item_link, item_votes } = newItems[i];
+      if (!item_name) {
+        return res.status(400).json({
+          error: `Missing 'item_name' in request body`
+        });
+      }
+  
+      const newItem = {
+        item_name,
+        item_address,
+        item_cuisine,
+        item_link,
+        item_votes,
+        date_created: 'now()',
+        poll_id: req.params.poll_id
+      };
+      newItems[i] = newItem;
     }
-
-    const newItem = {
-      item_name,
-      item_address,
-      item_cuisine,
-      item_link,
-      item_votes,
-      date_created: 'now()',
-      poll_id: req.params.poll_id
-    };
     return PollItemsService.insertItem(
       req.app.get('db'),
-      newItem
+      newItems
     )
       .then(item => {
         res
           .status(201)
           .location(path.posix.join(req.originalUrl, `/${item.id}`))
-          .json(PollItemsService.serializeItem(item));
+          .json(PollItemsService.serializeItems(item));
       })
       .catch(next);
   });

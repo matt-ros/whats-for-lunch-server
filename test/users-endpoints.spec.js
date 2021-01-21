@@ -3,8 +3,6 @@ const bcrypt = require('bcryptjs');
 const xss = require('xss');
 const app = require('../src/app');
 const helpers = require('./test-helpers');
-const supertest = require('supertest');
-const { expect } = require('chai');
 
 describe('Users Endpoints', () => {
   let db;

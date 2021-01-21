@@ -98,7 +98,7 @@ describe('Poll Items Endpoints', () => {
         return supertest(app)
           .post(`/api/items/poll/${newItemMissingName.poll_id}`)
           .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
-          .send(newItemMissingName)
+          .send([newItemMissingName])
           .expect(400, { error: `Missing 'item_name' in request body` });
       });
 
@@ -106,7 +106,7 @@ describe('Poll Items Endpoints', () => {
         const newItem = testPollItems[0];
         return supertest(app)
           .post(`/api/items/poll/${newItem.poll_id}`)
-          .send(newItem)
+          .send([newItem])
           .expect(403, { error: 'Poll belongs to a different user' });
       });
     });
@@ -114,46 +114,60 @@ describe('Poll Items Endpoints', () => {
     context('Happy path', () => {
       it('responds 201, serialized item', () => {
         const poll = testPolls[3];
-        const newItem = {
-          item_name: 'test item name',
-          item_address: 'test item address',
-          item_cuisine: 'test item cuisine',
-          item_link: 'test item link'
-        };
+        const newItem = [
+          {
+          item_name: 'test item name 1',
+          item_address: 'test item address 1',
+          item_cuisine: 'test item cuisine 1',
+          item_link: 'test item link 1'
+          },
+          {
+          item_name: 'test item name 2',
+          item_address: 'test item address 2',
+          item_cuisine: 'test item cuisine 2',
+          item_link: 'test item link 2'
+          },
+        ];
         return supertest(app)
           .post(`/api/items/poll/${poll.id}`)
           .send(newItem)
           .expect(201)
           .expect(res => {
-            expect(res.body).to.have.property('id');
-            expect(res.body.item_name).to.eql(newItem.item_name);
-            expect(res.body.item_address).to.eql(newItem.item_address);
-            expect(res.body.item_cuisine).to.eql(newItem.item_cuisine);
-            expect(res.body.item_link).to.eql(newItem.item_link);
-            expect(res.body.item_votes).to.eql(0);
-            expect(res.body.poll_id).to.eql(poll.id);
-            const expectedDateCreated = new Date().toLocaleString();
-            const actualDateCreated = new Date(res.body.date_created).toLocaleString();
-            expect(actualDateCreated).to.eql(expectedDateCreated);            
+            const items = res.body;
+            for (let i = 0; i < items.length; i++) {
+              expect(items[i]).to.have.property('id');
+              expect(items[i].item_name).to.eql(newItem[i].item_name);
+              expect(items[i].item_address).to.eql(newItem[i].item_address);
+              expect(items[i].item_cuisine).to.eql(newItem[i].item_cuisine);
+              expect(items[i].item_link).to.eql(newItem[i].item_link);
+              expect(items[i].item_votes).to.eql(0);
+              expect(items[i].poll_id).to.eql(poll.id);
+              const expectedDateCreated = new Date().toLocaleString();
+              const actualDateCreated = new Date(items[i].date_created).toLocaleString();
+              expect(actualDateCreated).to.eql(expectedDateCreated);            
+            }
           })
-          .expect(res =>
-            db
-              .from('whatsforlunch_poll_items')
-              .select('*')
-              .where({ id: res.body.id })
-              .first()
-              .then(row => {
-                expect(row.item_name).to.eql(newItem.item_name);
-                expect(row.item_address).to.eql(newItem.item_address);
-                expect(row.item_cuisine).to.eql(newItem.item_cuisine);
-                expect(row.item_link).to.eql(newItem.item_link);
-                expect(row.item_votes).to.eql(0);
-                expect(row.poll_id).to.eql(poll.id);
-                const expectedDBDateCreated = new Date().toLocaleString();
-                const actualDBDateCreated = new Date(row.date_created).toLocaleString();
-                expect(actualDBDateCreated).to.eql(expectedDBDateCreated);
-              })
-          );
+          .expect(res => {
+            const items = res.body;
+            for (let i = 0; i < items.length; i++) {
+              db
+                .from('whatsforlunch_poll_items')
+                .select('*')
+                .where({ id: items[i].id })
+                .first()
+                .then(row => {
+                  expect(row.item_name).to.eql(newItem[i].item_name);
+                  expect(row.item_address).to.eql(newItem[i].item_address);
+                  expect(row.item_cuisine).to.eql(newItem[i].item_cuisine);
+                  expect(row.item_link).to.eql(newItem[i].item_link);
+                  expect(row.item_votes).to.eql(0);
+                  expect(row.poll_id).to.eql(poll.id);
+                  const expectedDBDateCreated = new Date().toLocaleString();
+                  const actualDBDateCreated = new Date(row.date_created).toLocaleString();
+                  expect(actualDBDateCreated).to.eql(expectedDBDateCreated);
+                });
+            }
+          });
       });
     });
   });

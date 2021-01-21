@@ -17,8 +17,7 @@ const PollItemsService = {
     return db
       .insert(newItem)
       .into('whatsforlunch_poll_items')
-      .returning('*')
-      .then(([item]) => item);
+      .returning('*');
   },
 
   updateItem(db, id, newItemFields) {
