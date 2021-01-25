@@ -359,4 +359,40 @@ describe('Poll Items Endpoints', () => {
       });
     });
   });
+
+  describe('PATCH /api/items/resetVotes/:poll_id', () => {
+    context('Given no polls', () => {
+      beforeEach('insert users', () => helpers.seedUsers(db, testUsers));
+
+      it('responds with 404', () => {
+        const pollId = 123456;
+        return supertest(app)
+          .patch(`/api/items/resetVotes/${pollId}`)
+          .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
+          .expect(404, { error: `Poll doesn't exist` })
+      });
+    });
+
+    context('Given there are polls in the database', () => {
+      beforeEach('seed tables', () => helpers.seedWhatsForLunchTables(db, testUsers, testPolls, testPollItems));
+
+      it('responds 204 and resets vote counts', () => {
+        const idToUpdate = testPolls[0].id;
+        const user = testUsers.find(user => user.id === testPolls[0].user_id);
+        return supertest(app)
+          .patch(`/api/items/resetVotes/${idToUpdate}`)
+          .set('Authorization', helpers.makeAuthHeader(user))
+          .expect(204)
+          .then(res =>
+            supertest(app)
+            .get(`/api/items/poll/${idToUpdate}`)
+            .expect(res => {
+              res.body.forEach(item => {
+                expect(item.item_votes).to.eql(0);
+              });
+            })
+          );
+      })
+    })
+  })
 });

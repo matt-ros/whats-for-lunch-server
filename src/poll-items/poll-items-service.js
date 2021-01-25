@@ -7,6 +7,12 @@ const PollItemsService = {
       .where({ poll_id });
   },
 
+  resetVotesByPollId(db, poll_id) {
+    return db('whatsforlunch_poll_items')
+      .where({ poll_id })
+      .update({ item_votes: 0 });
+  },
+
   getItemById(db, id) {
     return db('whatsforlunch_poll_items')
       .where({ id })

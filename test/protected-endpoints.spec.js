@@ -61,6 +61,11 @@ describe('Protected Endpoints', () => {
       path: '/api/items/1',
       method: supertest(app).delete
     },
+    {
+      name: 'PATCH /api/items/resetVotes/:poll_id',
+      path: '/api/items/resetVotes/1',
+      method: supertest(app).patch
+    },
   ];
 
   protectedEndpoints.forEach(endpoint => {

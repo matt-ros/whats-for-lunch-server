@@ -108,6 +108,19 @@ pollItemsRouter
       .catch(next);
   });
 
+pollItemsRouter
+  .route('/resetVotes/:poll_id')
+  .patch(requireAuth, checkPollBelongsToUser, (req, res, next) => {
+    PollItemsService.resetVotesByPollId(
+      req.app.get('db'),
+      req.params.poll_id
+    )
+      .then(() => {
+        res.status(204).end();
+      })
+      .catch(next);
+  });
+
 async function checkItemExists(req, res, next) {
   try {
     const item = await PollItemsService.getItemById(
@@ -128,16 +141,25 @@ async function checkItemExists(req, res, next) {
 
 async function checkPollBelongsToUser(req, res, next) {
   const pollId = (res.item) ? res.item.poll_id : req.params.poll_id;
-  const poll = await PollsService.getPollById(
-    req.app.get('db'),
-    pollId
-  )
-  if (poll.user_id !== req.user.id) {
-    return res.status(403).json({
-      error: 'Poll belongs to a different user'
-    });
+  try {
+    const poll = await PollsService.getPollById(
+      req.app.get('db'),
+      pollId
+    )
+    if (!poll) {
+      return res.status(404).json({
+        error: `Poll doesn't exist`
+      });
+    }
+    if (poll.user_id !== req.user.id) {
+      return res.status(403).json({
+        error: 'Poll belongs to a different user'
+      });
+    }
+    next();
+  } catch (error) {
+    next(error);
   }
-  next();
 }
 
 async function checkIfLoggedIn(req, res, next) {
