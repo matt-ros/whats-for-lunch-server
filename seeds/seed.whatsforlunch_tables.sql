@@ -38,13 +38,8 @@ INSERT INTO whatsforlunch_polls (
     2
   ),
   (
-    'Expired Poll',
+    'Poll 3',
     '2020-01-22T16:28:32.615Z',
-    1
-  ),
-  (
-    'Poll 4',
-    '2029-01-22T16:28:32.615Z',
     1
   );
 
@@ -60,7 +55,7 @@ INSERT INTO whatsforlunch_poll_items (
     'Restaurant 1',
     '123 Main St',
     'Italian',
-    'restaurant1.com',
+    'http://www.example.com',
     3,
     1
   ),
@@ -68,7 +63,7 @@ INSERT INTO whatsforlunch_poll_items (
     'Restaurant 2',
     '456 Main St',
     'Sandwiches',
-    'restaurant2.com',
+    'http://www.example.com',
     4,
     1
   ),
@@ -76,7 +71,7 @@ INSERT INTO whatsforlunch_poll_items (
     'Restaurant 3',
     '789 Main St',
     'Burgers',
-    'restaurant3.com',
+    'http://www.example.com',
     0,
     1
   ),
@@ -84,7 +79,7 @@ INSERT INTO whatsforlunch_poll_items (
     'Restaurant 4',
     '321 Main St',
     'Sushi',
-    'restaurant4.com',
+    'http://www.example.com',
     2,
     1
   ),
@@ -92,7 +87,7 @@ INSERT INTO whatsforlunch_poll_items (
     'Restaurant 5',
     '654 Main St',
     'Mexican',
-    'restaurant5.com',
+    'http://www.example.com',
     3,
     2
   ),
@@ -100,7 +95,7 @@ INSERT INTO whatsforlunch_poll_items (
     'Restaurant 6',
     '987 Main St',
     'Pizza',
-    'restaurant6.com',
+    'http://www.example.com',
     5,
     2
   ),
@@ -108,7 +103,7 @@ INSERT INTO whatsforlunch_poll_items (
     'Restaurant 7',
     '147 Main St',
     'Indian',
-    'restaurant7.com',
+    'http://www.example.com',
     0,
     2
   ),
@@ -116,7 +111,7 @@ INSERT INTO whatsforlunch_poll_items (
     'Restaurant 8',
     '258 Main St',
     'Barbecue',
-    'restaurant8.com',
+    'http://www.example.com',
     3,
     3
   ),
@@ -124,7 +119,7 @@ INSERT INTO whatsforlunch_poll_items (
     'Restaurant 9',
     '369 Main St',
     'Greek',
-    'restaurant9.com',
+    'http://www.example.com',
     4,
     3
   ),
@@ -132,7 +127,7 @@ INSERT INTO whatsforlunch_poll_items (
     'Restaurant 10',
     '741 Main St',
     'Chinese',
-    'restaurant10.com',
+    'http://www.example.com',
     0,
     3
   );
