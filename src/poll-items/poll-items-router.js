@@ -29,6 +29,16 @@ pollItemsRouter
           error: `Missing 'item_name' in request body`
         });
       }
+
+      if (item_link) {
+        try {
+          new URL(newItems[i].item_link).toString();
+        } catch (error) {
+          return res.status(400).json({
+            error: 'Link is not a valid URL'
+          });
+        }
+      }
   
       const newItem = {
         item_name,

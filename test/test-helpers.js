@@ -74,7 +74,7 @@ function makePollItemsArray(polls) {
       item_name: 'test item 1',
       item_address: 'test item address 1',
       item_cuisine: 'test item cuisine 1',
-      item_link: 'test item link 1',
+      item_link: 'http://www.example.com',
       item_votes: 3,
       date_created: '2029-01-22T16:28:32.615Z',
       poll_id: polls[0].id
@@ -84,7 +84,7 @@ function makePollItemsArray(polls) {
       item_name: 'test item 2',
       item_address: 'test item address 2',
       item_cuisine: 'test item cuisine 2',
-      item_link: 'test item link 2',
+      item_link: 'http://www.example.com',
       item_votes: 2,
       date_created: '2029-01-22T16:28:32.615Z',
       poll_id: polls[0].id
@@ -94,7 +94,7 @@ function makePollItemsArray(polls) {
       item_name: 'test item 3',
       item_address: 'test item address 3',
       item_cuisine: 'test item cuisine 3',
-      item_link: 'test item link 3',
+      item_link: 'http://www.example.com',
       item_votes: 0,
       date_created: '2029-01-22T16:28:32.615Z',
       poll_id: polls[1].id
@@ -104,7 +104,7 @@ function makePollItemsArray(polls) {
       item_name: 'test item 4',
       item_address: 'test item address 4',
       item_cuisine: 'test item cuisine 4',
-      item_link: 'test item link 4',
+      item_link: 'http://www.example.com',
       item_votes: 4,
       date_created: '2029-01-22T16:28:32.615Z',
       poll_id: polls[1].id
@@ -114,7 +114,7 @@ function makePollItemsArray(polls) {
       item_name: 'test item 5',
       item_address: 'test item address 5',
       item_cuisine: 'test item cuisine 5',
-      item_link: 'test item link 5',
+      item_link: 'http://www.example.com',
       item_votes: 6,
       date_created: '2029-01-22T16:28:32.615Z',
       poll_id: polls[2].id
@@ -124,7 +124,7 @@ function makePollItemsArray(polls) {
       item_name: 'test item 6',
       item_address: 'test item address 6',
       item_cuisine: 'test item cuisine 6',
-      item_link: 'test item link 6',
+      item_link: 'http://www.example.com',
       item_votes: 1,
       date_created: '2029-01-22T16:28:32.615Z',
       poll_id: polls[2].id
@@ -134,7 +134,7 @@ function makePollItemsArray(polls) {
       item_name: 'test item 7',
       item_address: 'test item address 7',
       item_cuisine: 'test item cuisine 7',
-      item_link: 'test item link 7',
+      item_link: 'http://www.example.com',
       item_votes: 3,
       date_created: '2029-01-22T16:28:32.615Z',
       poll_id: polls[3].id
@@ -144,7 +144,7 @@ function makePollItemsArray(polls) {
       item_name: 'test item 8',
       item_address: 'test item address 8',
       item_cuisine: 'test item cuisine 8',
-      item_link: 'test item link 8',
+      item_link: 'http://www.example.com',
       item_votes: 2,
       date_created: '2029-01-22T16:28:32.615Z',
       poll_id: polls[3].id

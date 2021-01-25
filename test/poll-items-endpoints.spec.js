@@ -1,4 +1,5 @@
 const knex = require('knex');
+const supertest = require('supertest');
 const app = require('../src/app');
 const helpers = require('./test-helpers');
 
@@ -102,6 +103,18 @@ describe('Poll Items Endpoints', () => {
           .expect(400, { error: `Missing 'item_name' in request body` });
       });
 
+      it(`responds with 400 when 'item_link' is not a valid URL`, () => {
+        const itemInvalidLink = {
+          ...testPollItems[0],
+          item_link: 'invalid.com'
+        };
+        return supertest(app)
+          .post(`/api/items/poll/${itemInvalidLink.poll_id}`)
+          .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
+          .send([itemInvalidLink])
+          .expect(400, { error: 'Link is not a valid URL' });
+      });
+
       it(`responds with 403 when logged-in user doesn't match poll owner`, () => {
         const newItem = testPollItems[0];
         return supertest(app)
@@ -119,13 +132,13 @@ describe('Poll Items Endpoints', () => {
           item_name: 'test item name 1',
           item_address: 'test item address 1',
           item_cuisine: 'test item cuisine 1',
-          item_link: 'test item link 1'
+          item_link: 'http://example.com'
           },
           {
           item_name: 'test item name 2',
           item_address: 'test item address 2',
           item_cuisine: 'test item cuisine 2',
-          item_link: 'test item link 2'
+          item_link: 'http://example.com'
           },
         ];
         return supertest(app)
