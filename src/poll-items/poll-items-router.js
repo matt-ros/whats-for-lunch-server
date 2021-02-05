@@ -71,27 +71,6 @@ pollItemsRouter
   .all(requireAuth)
   .all(checkItemExists)
   .all(checkPollBelongsToUser)
-  .patch(jsonBodyParser, (req, res, next) => {
-    const { item_name, item_address, item_cuisine, item_link } = req.body;
-    const updateFields = { item_name, item_address, item_cuisine, item_link };
-    const numFields = Object.values(updateFields).filter(Boolean).length;
-    if (numFields === 0) {
-      return res.status(400).json({
-        error: `Request body must contain one of 'item_name', 'item_address', 'item_cuisine', or 'item_link'`
-      });
-    }
-
-    PollItemsService.updateItem(
-      req.app.get('db'),
-      req.params.id,
-      updateFields,
-    )
-      .then(() => {
-        res.status(204).end();
-      })
-      .catch(next);
-  })
-
   .delete((req, res, next) => {
     PollItemsService.deleteItem(
       req.app.get('db'),

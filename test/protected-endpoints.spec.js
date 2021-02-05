@@ -56,12 +56,6 @@ describe('Protected Endpoints', () => {
     },
     
     {
-      name: 'PATCH /api/items/:id',
-      path: '/api/items/1',
-      method: supertest(app).patch
-    },
-    
-    {
       name: 'DELETE /api/items/:id',
       path: '/api/items/1',
       method: supertest(app).delete
