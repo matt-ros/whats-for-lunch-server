@@ -7,13 +7,13 @@ describe('Polls Endpoints', () => {
 
   const {
     testUsers,
-    testPolls
+    testPolls,
   } = helpers.makeWhatsForLunchFixtures();
 
   before('make knex instance', () => {
     db = knex({
       client: 'pg',
-      connection: process.env.TEST_DATABASE_URL
+      connection: process.env.TEST_DATABASE_URL,
     });
     app.set('db', db);
   });
@@ -41,7 +41,7 @@ describe('Polls Endpoints', () => {
         helpers.seedWhatsForLunchTables(
           db,
           testUsers,
-          testPolls
+          testPolls,
         )
       );
 
@@ -58,7 +58,7 @@ describe('Polls Endpoints', () => {
       const testUser = testUsers[0];
       const {
         maliciousPoll,
-        expectedPoll
+        expectedPoll,
       } = helpers.makeMaliciousPoll(testUser);
 
       beforeEach('insert malicious poll', () => {
@@ -88,8 +88,9 @@ describe('Polls Endpoints', () => {
       it(`responds with 400 when 'end_time' is missing`, () => {
         const newPollMissingTime = {
           ...testPolls[0],
-          end_time: null
+          end_time: null,
         };
+
         return supertest(app)
           .post('/api/polls')
           .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
@@ -104,6 +105,7 @@ describe('Polls Endpoints', () => {
           poll_name: 'test poll_name',
           end_time: '2029-01-22T16:28:32.615Z'
         };
+
         return supertest(app)
           .post('/api/polls')
           .send(newPoll)
@@ -174,7 +176,7 @@ describe('Polls Endpoints', () => {
       const testUser = testUsers[0];
       const {
         maliciousPoll,
-        expectedPoll
+        expectedPoll,
       } = helpers.makeMaliciousPoll(testUser);
 
       beforeEach('insert malicious poll', () => {
@@ -214,7 +216,7 @@ describe('Polls Endpoints', () => {
         helpers.seedWhatsForLunchTables(
           db,
           testUsers,
-          testPolls
+          testPolls,
         )
       );
 
@@ -224,10 +226,12 @@ describe('Polls Endpoints', () => {
           poll_name: 'updated poll name',
           end_time: '2020-01-22T16:28:32.615Z'
         };
+
         const expectedPoll = {
           ...pollToUpdate,
-          ...updateFields
+          ...updateFields,
         };
+
         return supertest(app)
           .patch(`/api/polls/${pollToUpdate.id}`)
           .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
@@ -263,18 +267,20 @@ describe('Polls Endpoints', () => {
       it('responds 204 when updating only a subset of fields', () => {
         const pollToUpdate = testPolls[0];
         const updateFields = {
-          poll_name: 'Updated poll_name'
+          poll_name: 'Updated poll_name',
         };
+
         const expectedPoll = {
           ...pollToUpdate,
-          ...updateFields
+          ...updateFields,
         };
+
         return supertest(app)
           .patch(`/api/polls/${pollToUpdate.id}`)
           .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
           .send({
             ...updateFields,
-            fieldToIgnore: 'should not be in GET response'
+            fieldToIgnore: 'should not be in GET response',
           })
           .expect(204)
           .then(res =>
@@ -305,14 +311,17 @@ describe('Polls Endpoints', () => {
         helpers.seedWhatsForLunchTables(
           db,
           testUsers,
-          testPolls
+          testPolls,
         )
       );
 
       it('responds 204 and removes the poll', () => {
         const pollToRemove = testPolls[2];
         const user = testUsers.find(user => user.id === pollToRemove.user_id);
-        const expectedPolls = testPolls.filter(poll => poll.user_id === user.id && poll.id !== pollToRemove.id);
+        const expectedPolls = testPolls.filter(poll => (
+          poll.user_id === user.id && poll.id !== pollToRemove.id
+        ));
+
         return supertest(app)
           .delete(`/api/polls/${pollToRemove.id}`)
           .set('Authorization', helpers.makeAuthHeader(user))

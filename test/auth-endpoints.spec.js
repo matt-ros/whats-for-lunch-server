@@ -12,7 +12,7 @@ describe('Auth Endpoints', () => {
   before('make knex instance', () => {
     db = knex({
       client: 'pg',
-      connection: process.env.TEST_DATABASE_URL
+      connection: process.env.TEST_DATABASE_URL,
     });
     app.set('db', db);
   });
@@ -27,16 +27,16 @@ describe('Auth Endpoints', () => {
     beforeEach('insert users', () =>
       helpers.seedUsers(
         db,
-        testUsers
+        testUsers,
       )
-    )
+    );
 
     const requiredFields = ['user_name', 'password'];
 
     requiredFields.forEach(field => {
       const loginAttemptBody = {
         user_name: testUser.user_name,
-        password: testUser.password
+        password: testUser.password,
       };
 
       it(`responds with 400 required error when '${field}' is missing`, () => {
@@ -72,6 +72,7 @@ describe('Auth Endpoints', () => {
         user_name: testUser.user_name,
         password: testUser.password
       };
+
       const expectedToken = jwt.sign(
         { user_id: testUser.id }, // payload
         process.env.JWT_SECRET,

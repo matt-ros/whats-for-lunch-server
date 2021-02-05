@@ -47,13 +47,13 @@ const PollItemsService = {
       item_link: xss(item.item_link),
       item_votes: item.item_votes,
       date_created: new Date(item.date_created),
-      poll_id: item.poll_id
+      poll_id: item.poll_id,
     };
   },
 
   serializeItems(items) {
     return items.map(this.serializeItem);
-  }
+  },
 }
 
 module.exports = PollItemsService;

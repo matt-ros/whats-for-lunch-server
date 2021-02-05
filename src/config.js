@@ -6,4 +6,4 @@ module.exports = {
   JWT_EXPIRY: process.env.JWT_EXPIRY || '12h',
   DATABASE_URL: process.env.DATABASE_URL || 'postgresql://postgres@localhost/whats-for-lunch',
   TEST_DATABASE_URL: process.env.TEST_DATABASE_URL || 'postgresql://postgres@localhost/whats-for-lunch-test',
-}
+};

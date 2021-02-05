@@ -11,7 +11,7 @@ pollsRouter
   .get(requireAuth, (req, res, next) => {
     PollsService.getAllPollsByUserId(
       req.app.get('db'),
-      req.user.id
+      req.user.id,
     )
       .then(polls => {
         res.json(PollsService.serializePolls(polls));
@@ -26,15 +26,17 @@ pollsRouter
         error: `Missing 'end_time' in request body`
       });
     }
+
     const newPoll = {
       poll_name,
       end_time,
       date_created: 'now()',
-      user_id: (req.user) ? req.user.id : null
+      user_id: (req.user) ? req.user.id : null,
     };
+
     return PollsService.insertPoll(
       req.app.get('db'),
-      newPoll
+      newPoll,
     )
       .then(poll => {
         res
@@ -56,13 +58,15 @@ pollsRouter
     const updateFields = { poll_name, end_time };
     const numFields = Object.values(updateFields).filter(Boolean).length;
     if (numFields === 0) {
-      return res.status(400).json({ error: `Request body must contain 'poll_name' or 'end_time'` });
+      return res.status(400).json({
+        error: `Request body must contain 'poll_name' or 'end_time'`
+      });
     }
 
     PollsService.updatePoll(
       req.app.get('db'),
       req.params.id,
-      updateFields
+      updateFields,
     )
       .then(() => {
         res.status(204).end();
@@ -73,7 +77,7 @@ pollsRouter
   .delete(requireAuth, checkPollExists, checkPollBelongsToUser, (req, res, next) => {
     PollsService.deletePoll(
       req.app.get('db'),
-      req.params.id
+      req.params.id,
     )
       .then(() => {
         res.status(204).end();
@@ -85,13 +89,15 @@ async function checkPollExists(req, res, next) {
   try {
     const poll = await PollsService.getPollById(
       req.app.get('db'),
-      req.params.id
-    )
+      req.params.id,
+    );
+
     if (!poll) {
       return res.status(404).json({
         error: `Poll doesn't exist`
       });
     }
+
     res.poll = poll;
     next();
   } catch (error) {
@@ -111,8 +117,7 @@ async function checkPollBelongsToUser(req, res, next) {
 async function checkIfLoggedIn(req, res, next) {
   if (req.get('Authorization')) {
     requireAuth(req, res, next);
-  }
-  else {
+  } else {
     next();
   }
 }

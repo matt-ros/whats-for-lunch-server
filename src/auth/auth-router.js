@@ -19,7 +19,7 @@ authRouter
 
     AuthService.getUserWithUserName(
       req.app.get('db'),
-      loginUser.user_name
+      loginUser.user_name,
     )
       .then(dbUser => {
         if (!dbUser) {
@@ -44,6 +44,6 @@ authRouter
           })
       })
       .catch(next);
-  })
+  });
 
 module.exports = authRouter;

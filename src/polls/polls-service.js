@@ -39,13 +39,13 @@ const PollsService = {
       poll_name: xss(poll.poll_name),
       end_time: new Date(poll.end_time),
       date_created: new Date(poll.date_created),
-      user_id: poll.user_id
+      user_id: poll.user_id,
     };
   },
 
   serializePolls(polls) {
     return polls.map(this.serializePoll);
-  }
+  },
 }
 
 module.exports = PollsService;

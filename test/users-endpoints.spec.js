@@ -13,7 +13,7 @@ describe('Users Endpoints', () => {
   before('make knex instance', () => {
     db = knex({
       client: 'pg',
-      connection: process.env.TEST_DATABASE_URL
+      connection: process.env.TEST_DATABASE_URL,
     });
     app.set('db', db);
   });
@@ -29,7 +29,7 @@ describe('Users Endpoints', () => {
       beforeEach('insert users', () =>
         helpers.seedUsers(
           db,
-          testUsers
+          testUsers,
         )
       );
 
@@ -39,7 +39,7 @@ describe('Users Endpoints', () => {
         const registerAttemptBody = {
           user_name: 'test user_name',
           password: 'test password',
-          full_name: 'test full_name'
+          full_name: 'test full_name',
         };
 
         it(`responds with 400 required error when '${field}' is missing`, () => {
@@ -58,8 +58,9 @@ describe('Users Endpoints', () => {
         const userShortPassword = {
           user_name: 'test user_name',
           password: '1234567',
-          full_name: 'test full_name'
+          full_name: 'test full_name',
         };
+
         return supertest(app)
           .post('/api/users')
           .send(userShortPassword)
@@ -70,8 +71,9 @@ describe('Users Endpoints', () => {
         const userLongPassword = {
           user_name: 'test user_name',
           password: '*'.repeat(73),
-          full_name: 'test full_name'
+          full_name: 'test full_name',
         };
+
         return supertest(app)
           .post('/api/users')
           .send(userLongPassword)
@@ -82,8 +84,9 @@ describe('Users Endpoints', () => {
         const userPasswordStartsSpaces = {
           user_name: 'test user_name',
           password: ' 1Aa!2Bb@',
-          full_name: 'test full_name'
+          full_name: 'test full_name',
         };
+
         return supertest(app)
           .post('/api/users')
           .send(userPasswordStartsSpaces)
@@ -94,8 +97,9 @@ describe('Users Endpoints', () => {
         const userPasswordEndsSpaces = {
           user_name: 'test user_name',
           password: '1Aa!2Bb@ ',
-          full_name: 'test full_name'
+          full_name: 'test full_name',
         };
+
         return supertest(app)
           .post('/api/users')
           .send(userPasswordEndsSpaces)
@@ -106,8 +110,9 @@ describe('Users Endpoints', () => {
         const userPasswordNotComplex = {
           user_name: 'test user_name',
           password: '11AAaabb',
-          full_name: 'test full_name'
+          full_name: 'test full_name',
         };
+
         return supertest(app)
           .post('/api/users')
           .send(userPasswordNotComplex)
@@ -118,8 +123,9 @@ describe('Users Endpoints', () => {
         const duplicateUser = {
           user_name: testUser.user_name,
           password: '11AAaa!!',
-          full_name: 'test full_name'
+          full_name: 'test full_name',
         };
+
         return supertest(app)
           .post('/api/users')
           .send(duplicateUser)
@@ -132,8 +138,9 @@ describe('Users Endpoints', () => {
         const newUser = {
           user_name: 'test user_name',
           password: '11AAaa!!',
-          full_name: 'test full_name'
+          full_name: 'test full_name',
         };
+
         return supertest(app)
           .post('/api/users')
           .send(newUser)
@@ -185,7 +192,7 @@ describe('Users Endpoints', () => {
       beforeEach('insert users', () =>
         helpers.seedUsers(
           db,
-          testUsers
+          testUsers,
         )
       );
 
@@ -207,7 +214,7 @@ describe('Users Endpoints', () => {
         beforeEach('insert malicious user', () => {
           return helpers.seedMaliciousUser(
             db,
-            maliciousUser
+            maliciousUser,
           );
         });
 

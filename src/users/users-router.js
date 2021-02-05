@@ -27,7 +27,7 @@ usersRouter
 
     UsersService.hasUserWithUserName(
       req.app.get('db'),
-      user_name
+      user_name,
     )
       .then(hasUserWithUserName => {
         if (hasUserWithUserName) {
@@ -40,12 +40,12 @@ usersRouter
               user_name,
               password: hashedPassword,
               full_name,
-              date_created: 'now()'
-            }
+              date_created: 'now()',
+            };
 
             return UsersService.insertUser(
               req.app.get('db'),
-              newUser
+              newUser,
             )
               .then(user => {
                 res

@@ -10,6 +10,7 @@ function makeUsersArray() {
       password: 'password',
       date_created: '2029-01-22T16:28:32.615Z',
     },
+    
     {
       id: 2,
       user_name: 'test-user-2',
@@ -17,6 +18,7 @@ function makeUsersArray() {
       password: 'password',
       date_created: '2029-01-22T16:28:32.615Z',
     },
+    
     {
       id: 3,
       user_name: 'test-user-3',
@@ -24,6 +26,7 @@ function makeUsersArray() {
       password: 'password',
       date_created: '2029-01-22T16:28:32.615Z',
     },
+    
     {
       id: 4,
       user_name: 'test-user-4',
@@ -41,28 +44,31 @@ function makePollsArray(users) {
       poll_name: 'test-poll-1',
       end_time: '2029-01-22T16:28:32.615Z',
       date_created: '2029-01-22T16:28:32.615Z',
-      user_id: users[0].id
+      user_id: users[0].id,
     },
+    
     {
       id: 2,
       poll_name: 'test-poll-1',
       end_time: '2029-01-22T16:28:32.615Z',
       date_created: '2029-01-22T16:28:32.615Z',
-      user_id: users[3].id
+      user_id: users[3].id,
     },
+    
     {
       id: 3,
       poll_name: 'test-poll-1',
       end_time: '2029-01-22T16:28:32.615Z',
       date_created: '2029-01-22T16:28:32.615Z',
-      user_id: users[0].id
+      user_id: users[0].id,
     },
+    
     {
       id: 4,
       poll_name: 'test-poll-1',
       end_time: '2029-01-22T16:28:32.615Z',
       date_created: '2029-01-22T16:28:32.615Z',
-      user_id: null
+      user_id: null,
     },
   ];
 }
@@ -77,8 +83,9 @@ function makePollItemsArray(polls) {
       item_link: 'http://www.example.com',
       item_votes: 3,
       date_created: '2029-01-22T16:28:32.615Z',
-      poll_id: polls[0].id
+      poll_id: polls[0].id,
     },
+    
     {
       id: 2,
       item_name: 'test item 2',
@@ -87,8 +94,9 @@ function makePollItemsArray(polls) {
       item_link: 'http://www.example.com',
       item_votes: 2,
       date_created: '2029-01-22T16:28:32.615Z',
-      poll_id: polls[0].id
+      poll_id: polls[0].id,
     },
+    
     {
       id: 3,
       item_name: 'test item 3',
@@ -97,8 +105,9 @@ function makePollItemsArray(polls) {
       item_link: 'http://www.example.com',
       item_votes: 0,
       date_created: '2029-01-22T16:28:32.615Z',
-      poll_id: polls[1].id
+      poll_id: polls[1].id,
     },
+    
     {
       id: 4,
       item_name: 'test item 4',
@@ -107,8 +116,9 @@ function makePollItemsArray(polls) {
       item_link: 'http://www.example.com',
       item_votes: 4,
       date_created: '2029-01-22T16:28:32.615Z',
-      poll_id: polls[1].id
+      poll_id: polls[1].id,
     },
+    
     {
       id: 5,
       item_name: 'test item 5',
@@ -117,8 +127,9 @@ function makePollItemsArray(polls) {
       item_link: 'http://www.example.com',
       item_votes: 6,
       date_created: '2029-01-22T16:28:32.615Z',
-      poll_id: polls[2].id
+      poll_id: polls[2].id,
     },
+    
     {
       id: 6,
       item_name: 'test item 6',
@@ -127,8 +138,9 @@ function makePollItemsArray(polls) {
       item_link: 'http://www.example.com',
       item_votes: 1,
       date_created: '2029-01-22T16:28:32.615Z',
-      poll_id: polls[2].id
+      poll_id: polls[2].id,
     },
+    
     {
       id: 7,
       item_name: 'test item 7',
@@ -137,8 +149,9 @@ function makePollItemsArray(polls) {
       item_link: 'http://www.example.com',
       item_votes: 3,
       date_created: '2029-01-22T16:28:32.615Z',
-      poll_id: polls[3].id
+      poll_id: polls[3].id,
     },
+    
     {
       id: 8,
       item_name: 'test item 8',
@@ -147,7 +160,7 @@ function makePollItemsArray(polls) {
       item_link: 'http://www.example.com',
       item_votes: 2,
       date_created: '2029-01-22T16:28:32.615Z',
-      poll_id: polls[3].id
+      poll_id: polls[3].id,
     },
   ];
 }
@@ -174,6 +187,7 @@ function seedUsers(db, users) {
     ...user,
     password: bcrypt.hashSync(user.password, 1),
   }));
+
   return db.into('whatsforlunch_users').insert(preppedUsers)
     .then(() =>
       // update the auto sequence to stay in sync
@@ -184,26 +198,30 @@ function seedUsers(db, users) {
     );
 }
 
-function seedWhatsForLunchTables(db, users, polls = [], pollItems = []) { // add other tables as created
+function seedWhatsForLunchTables(db, users, polls = [], pollItems = []) {
   // use a transaction to group queries and auto rollback on failure
   return db.transaction(async trx => {
     await seedUsers(trx, users);
+
     // only insert other tables if they are there, update sequence counters
     if (polls.length) {
-      await trx.into('whatsforlunch_polls').insert(polls)
+      await trx.into('whatsforlunch_polls').insert(polls);
+
       // update auto sequence to match forced id values
       await trx.raw(
         `SELECT setval('whatsforlunch_polls_id_seq', ?)`,
         [polls[polls.length - 1].id]
-      )
+      );
     }
+
     if (pollItems.length) {
-      await trx.into('whatsforlunch_poll_items').insert(pollItems)
+      await trx.into('whatsforlunch_poll_items').insert(pollItems);
+
       // update auto sequence to match forced id values
       await trx.raw(
         `SELECT setval('whatsforlunch_poll_items_id_seq', ?)`,
         [pollItems[pollItems.length - 1].id]
-      )
+      );
     }
   });
 }
@@ -224,14 +242,16 @@ function makeMaliciousUser() {
     password: 'password',
     date_created: '2029-01-22T16:28:32.615Z',
   };
+
   const expectedUser = {
     ...maliciousUser,
     user_name: 'Naughty naughty very naughty &lt;script&gt;alert(\"xss\");&lt;/script&gt;',
     full_name: 'Naughty naughty very naughty &lt;script&gt;alert(\"xss\");&lt;/script&gt;',
   };
+
   return {
     maliciousUser,
-    expectedUser
+    expectedUser,
   };
 }
 
@@ -241,15 +261,17 @@ function makeMaliciousPoll(user) {
     poll_name: 'Naughty naughty very naughty <script>alert("xss");</script>',
     end_time: '2029-01-22T16:28:32.615Z',
     date_created: new Date().toISOString(),
-    user_id: user.id
+    user_id: user.id,
   };
+
   const expectedPoll = {
     ...maliciousPoll,
-    poll_name: 'Naughty naughty very naughty &lt;script&gt;alert(\"xss\");&lt;/script&gt;'
+    poll_name: 'Naughty naughty very naughty &lt;script&gt;alert(\"xss\");&lt;/script&gt;',
   };
+
   return {
     maliciousPoll,
-    expectedPoll
+    expectedPoll,
   };
 }
 
@@ -261,18 +283,20 @@ function makeMaliciousPollItem(poll) {
     item_cuisine: 'Naughty naughty very naughty <script>alert("xss");</script>',
     item_link: `Bad image <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">. But not <strong>all</strong> bad.`,
     item_votes: 10,
-    poll_id: poll.id
+    poll_id: poll.id,
   };
+
   const expectedPollItem = {
     ...maliciousPollItem,
     item_name: 'Naughty naughty very naughty &lt;script&gt;alert(\"xss\");&lt;/script&gt;',
     item_address: 'Naughty naughty very naughty &lt;script&gt;alert(\"xss\");&lt;/script&gt;',
     item_cuisine: 'Naughty naughty very naughty &lt;script&gt;alert(\"xss\");&lt;/script&gt;',
-    item_link: `Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.`
+    item_link: `Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.`,
   };
+
   return {
     maliciousPollItem,
-    expectedPollItem
+    expectedPollItem,
   };
 }
 
@@ -308,4 +332,4 @@ module.exports = {
   seedMaliciousUser,
   seedMaliciousPoll,
   seedMaliciousPollItem,
-}
+};

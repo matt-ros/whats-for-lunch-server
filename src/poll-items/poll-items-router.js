@@ -12,7 +12,7 @@ pollItemsRouter
   .get((req, res, next) => {
     PollItemsService.getAllItemsByPollId(
       req.app.get('db'),
-      req.params.poll_id
+      req.params.poll_id,
     )
       .then(items => {
         res.json(PollItemsService.serializeItems(items));
@@ -47,13 +47,15 @@ pollItemsRouter
         item_link,
         item_votes,
         date_created: 'now()',
-        poll_id: req.params.poll_id
+        poll_id: req.params.poll_id,
       };
+
       newItems[i] = newItem;
     }
+
     return PollItemsService.insertItem(
       req.app.get('db'),
-      newItems
+      newItems,
     )
       .then(item => {
         res
@@ -82,7 +84,7 @@ pollItemsRouter
     PollItemsService.updateItem(
       req.app.get('db'),
       req.params.id,
-      updateFields
+      updateFields,
     )
       .then(() => {
         res.status(204).end();
@@ -93,7 +95,7 @@ pollItemsRouter
   .delete((req, res, next) => {
     PollItemsService.deleteItem(
       req.app.get('db'),
-      req.params.id
+      req.params.id,
     )
       .then(() => {
         res.status(204).end();
@@ -105,12 +107,13 @@ pollItemsRouter
   .route('/vote/:id')
   .patch(checkItemExists, (req, res, next) => {
     const updateFields = {
-      item_votes: res.item.item_votes + 1
-    }
+      item_votes: res.item.item_votes + 1,
+    };
+
     PollItemsService.updateItem(
       req.app.get('db'),
       req.params.id,
-      updateFields
+      updateFields,
     )
       .then(() => {
         res.status(204).end();
@@ -123,7 +126,7 @@ pollItemsRouter
   .patch(requireAuth, checkPollBelongsToUser, (req, res, next) => {
     PollItemsService.resetVotesByPollId(
       req.app.get('db'),
-      req.params.poll_id
+      req.params.poll_id,
     )
       .then(() => {
         res.status(204).end();
@@ -135,13 +138,15 @@ async function checkItemExists(req, res, next) {
   try {
     const item = await PollItemsService.getItemById(
       req.app.get('db'),
-      req.params.id
-    )
+      req.params.id,
+    );
+
     if (!item) {
       return res.status(404).json({
         error: `Item doesn't exist`
       });
     }
+
     res.item = item;
     next();
   } catch (error) {
@@ -154,18 +159,21 @@ async function checkPollBelongsToUser(req, res, next) {
   try {
     const poll = await PollsService.getPollById(
       req.app.get('db'),
-      pollId
-    )
+      pollId,
+    );
+
     if (!poll) {
       return res.status(404).json({
         error: `Poll doesn't exist`
       });
     }
+
     if (poll.user_id !== req.user.id) {
       return res.status(403).json({
         error: 'Poll belongs to a different user'
       });
     }
+
     next();
   } catch (error) {
     next(error);
@@ -175,8 +183,7 @@ async function checkPollBelongsToUser(req, res, next) {
 async function checkIfLoggedIn(req, res, next) {
   if (req.get('Authorization')) {
     requireAuth(req, res, next);
-  }
-  else {
+  } else {
     req.user = { id: null };
     next();
   }

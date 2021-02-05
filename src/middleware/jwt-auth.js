@@ -14,7 +14,7 @@ function requireAuth(req, res, next) {
 
     AuthService.getUserWithUserName(
       req.app.get('db'),
-      payload.sub
+      payload.sub,
     )
       .then(user => {
         if (!user) {
@@ -27,12 +27,12 @@ function requireAuth(req, res, next) {
       .catch(err => {
         console.error(err);
         next(err);
-      })
+      });
   } catch(error) {
     res.status(401).json({ error: 'Unauthorized request' });
   }
 }
 
 module.exports = {
-  requireAuth
-}
+  requireAuth,
+};

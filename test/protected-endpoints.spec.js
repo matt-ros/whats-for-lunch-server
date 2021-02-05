@@ -12,7 +12,7 @@ describe('Protected Endpoints', () => {
   before('make knex instance', () => {
     db = knex({
       client: 'pg',
-      connection: process.env.TEST_DATABASE_URL
+      connection: process.env.TEST_DATABASE_URL,
     });
     app.set('db', db);
   });
@@ -36,31 +36,37 @@ describe('Protected Endpoints', () => {
       path: '/api/users',
       method: supertest(app).get
     },
+    
     {
       name: 'GET /api/polls',
       path: '/api/polls',
       method: supertest(app).get
     },
+
     {
       name: 'PATCH /api/polls/:id',
       path: '/api/polls/1',
       method: supertest(app).patch
     },
+
     {
       name: 'DELETE /api/polls/:id',
       path: '/api/polls/1',
       method: supertest(app).delete
     },
+    
     {
       name: 'PATCH /api/items/:id',
       path: '/api/items/1',
       method: supertest(app).patch
     },
+    
     {
       name: 'DELETE /api/items/:id',
       path: '/api/items/1',
       method: supertest(app).delete
     },
+    
     {
       name: 'PATCH /api/items/resetVotes/:poll_id',
       path: '/api/items/resetVotes/1',

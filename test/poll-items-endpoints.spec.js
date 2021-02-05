@@ -9,13 +9,13 @@ describe('Poll Items Endpoints', () => {
   const {
     testUsers,
     testPolls,
-    testPollItems
+    testPollItems,
   } = helpers.makeWhatsForLunchFixtures();
 
   before('make knex instance', () => {
     db = knex({
       client: 'pg',
-      connection: process.env.TEST_DATABASE_URL
+      connection: process.env.TEST_DATABASE_URL,
     });
     app.set('db', db);
   });
@@ -44,7 +44,7 @@ describe('Poll Items Endpoints', () => {
           db,
           testUsers,
           testPolls,
-          testPollItems
+          testPollItems,
         )
       );
 
@@ -61,7 +61,7 @@ describe('Poll Items Endpoints', () => {
       const testPoll = testPolls[0];
       const {
         maliciousPollItem,
-        expectedPollItem
+        expectedPollItem,
       } = helpers.makeMaliciousPollItem(testPoll);
 
       beforeEach('insert malicious item', () => {
@@ -69,7 +69,7 @@ describe('Poll Items Endpoints', () => {
           db,
           testUser,
           testPoll,
-          maliciousPollItem
+          maliciousPollItem,
         );
       });
 
@@ -96,6 +96,7 @@ describe('Poll Items Endpoints', () => {
           ...testPollItems[0],
           item_name: null
         };
+
         return supertest(app)
           .post(`/api/items/poll/${newItemMissingName.poll_id}`)
           .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
@@ -108,6 +109,7 @@ describe('Poll Items Endpoints', () => {
           ...testPollItems[0],
           item_link: 'invalid.com'
         };
+
         return supertest(app)
           .post(`/api/items/poll/${itemInvalidLink.poll_id}`)
           .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
@@ -129,18 +131,20 @@ describe('Poll Items Endpoints', () => {
         const poll = testPolls[3];
         const newItem = [
           {
-          item_name: 'test item name 1',
-          item_address: 'test item address 1',
-          item_cuisine: 'test item cuisine 1',
-          item_link: 'http://example.com'
+            item_name: 'test item name 1',
+            item_address: 'test item address 1',
+            item_cuisine: 'test item cuisine 1',
+            item_link: 'http://example.com',
           },
+
           {
-          item_name: 'test item name 2',
-          item_address: 'test item address 2',
-          item_cuisine: 'test item cuisine 2',
-          item_link: 'http://example.com'
+            item_name: 'test item name 2',
+            item_address: 'test item address 2',
+            item_cuisine: 'test item cuisine 2',
+            item_link: 'http://example.com',
           },
         ];
+
         return supertest(app)
           .post(`/api/items/poll/${poll.id}`)
           .send(newItem)
@@ -204,7 +208,7 @@ describe('Poll Items Endpoints', () => {
           db,
           testUsers,
           testPolls,
-          testPollItems
+          testPollItems,
         )
       );
 
@@ -214,12 +218,14 @@ describe('Poll Items Endpoints', () => {
           item_name: 'updated item name',
           item_address: 'updated item address',
           item_cuisine: 'updated item cuisine',
-          item_link: 'updated item link'
+          item_link: 'updated item link',
         };
+
         const expectedItem = {
           ...itemToUpdate,
-          ...updateFields
+          ...updateFields,
         };
+
         return supertest(app)
           .patch(`/api/items/${itemToUpdate.id}`)
           .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
@@ -259,18 +265,20 @@ describe('Poll Items Endpoints', () => {
       it('responds 204 when updating only a subset of fields', () => {
         const itemToUpdate = testPollItems[0];
         const updateFields = {
-          item_name: 'Updated item name'
+          item_name: 'Updated item name',
         };
+
         const expectedItem = {
           ...itemToUpdate,
-          ...updateFields
+          ...updateFields,
         };
+
         return supertest(app)
           .patch(`/api/items/${itemToUpdate.id}`)
           .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
           .send({
             ...updateFields,
-            fieldToIgnore: 'should not be in GET response'
+            fieldToIgnore: 'should not be in GET response',
           })
           .expect(204)
           .then(res =>
@@ -305,7 +313,7 @@ describe('Poll Items Endpoints', () => {
           db,
           testUsers,
           testPolls,
-          testPollItems
+          testPollItems,
         )
       );
 
@@ -313,7 +321,10 @@ describe('Poll Items Endpoints', () => {
         const itemToRemove = testPollItems[2];
         const poll = testPolls.find(poll => poll.id === itemToRemove.poll_id);
         const user = testUsers.find(user => user.id === poll.user_id);
-        const expectedItems = testPollItems.filter(item => item.poll_id === poll.id && item.id !== itemToRemove.id);
+        const expectedItems = testPollItems.filter(item => (
+          item.poll_id === poll.id && item.id !== itemToRemove.id
+        ));
+
         return supertest(app)
           .delete(`/api/items/${itemToRemove.id}`)
           .set('Authorization', helpers.makeAuthHeader(user))
@@ -350,14 +361,22 @@ describe('Poll Items Endpoints', () => {
     });
 
     context('Given there are items in the database', () => {
-      beforeEach('seed tables', () => helpers.seedWhatsForLunchTables(db, testUsers, testPolls, testPollItems));
+      beforeEach('seed tables', () =>
+        helpers.seedWhatsForLunchTables(
+          db,
+          testUsers,
+          testPolls,
+          testPollItems,
+        )
+      );
 
       it('responds 204 and updates vote count', () => {
         const itemToVote = testPollItems[0];
         const expectedItem = {
           ...itemToVote,
-          item_votes: itemToVote.item_votes + 1
+          item_votes: itemToVote.item_votes + 1,
         };
+
         return supertest(app)
           .patch(`/api/items/vote/${itemToVote.id}`)
           .expect(204)
@@ -387,7 +406,14 @@ describe('Poll Items Endpoints', () => {
     });
 
     context('Given there are polls in the database', () => {
-      beforeEach('seed tables', () => helpers.seedWhatsForLunchTables(db, testUsers, testPolls, testPollItems));
+      beforeEach('seed tables', () =>
+        helpers.seedWhatsForLunchTables(
+          db,
+          testUsers,
+          testPolls,
+          testPollItems,
+        )
+      );
 
       it('responds 204 and resets vote counts', () => {
         const idToUpdate = testPolls[0].id;
@@ -405,7 +431,7 @@ describe('Poll Items Endpoints', () => {
               });
             })
           );
-      })
-    })
-  })
+      });
+    });
+  });
 });
