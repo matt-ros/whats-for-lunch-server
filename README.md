@@ -1,26 +1,79 @@
-# Express Boilerplate!
+# What's For Lunch?
 
-This is a boilerplate project used for starting new projects!
+[Live App](https://whats-for-lunch-client.vercel.app/)
 
-## Set up
+[What's For Lunch Client Repo](https://github.com/matt-ros/whats-for-lunch-client)
 
-Complete the following steps to start a new project (NEW-PROJECT-NAME):
+## Summary
 
-1. Clone this repository to your local machine: `git clone https://github.com/matt-ros/express-boilerplate.git NEW-PROJECT-NAME`
-2. `cd` into the cloned repository
-3. Make a fresh start of the git history for this project: `rm -rf .git && git init`
-4. Install the node dependencies: `npm install`
-5. Move the example Environment file to `.env` that will be ignored by git and read by the express server: `mv example.env .env`
-6. Edit the contents of the `package.json` to use NEW-PROJECT-NAME instead of `"name": "express-boilerplate",`
+What's For Lunch makes it easy for a group to decide where to eat.  Create a poll, share with your group, eat at the winning spot!  It was originally intended for co-workers eating lunch, but it can be used by anyone!  No sign up is required to create or vote in a poll, but an account will allow you to edit and reuse your previous polls.
 
-## Scripts
+## Screenshots
 
-Start the application: `npm start`
+### Landing Page
 
-Start the application with nodemon: `npm run dev`
+![Screenshot of Landing page](https://i.ibb.co/phVScmD/Screenshot-landing-page.png)
 
-Run the tests: `npm test`
+### Poll Page
 
-## Deploying
+![Screenshot of Poll page](https://i.ibb.co/KWR75Ch/Screenshot-poll.png)
 
-When your new project is ready for deployment, add a new Heroku application with `heroku create`. This will make a new git remote called "heroku" and you can then `npm run deploy` which will push to this remote's master branch.
+### Results Page
+
+![Screenshot of Results page](https://i.ibb.co/nncgsXR/Screenshot-results.png)
+
+### User Homepage
+
+![Screenshot of User Homepage](https://i.ibb.co/183Lx4d/screenshot-homepage.png)
+
+## API Endpoints
+
+### `/auth/login`
+
+`POST` logs in a user with valid credentials
+
+### `/items/:id`
+
+`DELETE` deletes an item from a poll (Protected)
+
+### `/items/poll/:poll_id`
+
+`GET` retrieves all poll items associated with the specified poll
+
+`POST` adds an array of new poll items associated with the specified poll
+
+### `/items/vote/:id`
+
+`PATCH` increments the vote count by 1 for the specified item
+
+### `/items/resetVotes/:poll_id`
+
+`PATCH` sets the vote count to 0 for all items associated with the specified poll (Protected)
+
+### `/polls`
+
+`GET` retrieves all polls associated with the currently logged in user (Protected)
+
+`POST` adds a new poll.  If the user is logged in, the poll is associated with that user
+
+### `/polls/:id`
+
+`GET` retrieves the specified poll
+
+`PATCH` updates the poll's information (Protected)
+
+`DELETE` deletes the poll (Protected)
+
+### `/users`
+
+`POST` creates a new user
+
+`GET` retrieves the current user's information (Protected)
+
+## Technology
+
+* Node.js
+* Express
+* PostgreSQL
+* Knex.js for database queries
+* Mocha/Chai/Supertest for testing
