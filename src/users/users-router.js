@@ -14,7 +14,7 @@ usersRouter
     for (const field of ['full_name', 'user_name', 'password']) {
       if (!req.body[field]) {
         return res.status(400).json({
-          error: `Missing '${field}' in request body`
+          error: `Missing '${field}' in request body`,
         });
       }
     }
@@ -29,13 +29,13 @@ usersRouter
       req.app.get('db'),
       user_name,
     )
-      .then(hasUserWithUserName => {
+      .then((hasUserWithUserName) => {
         if (hasUserWithUserName) {
           return res.status(400).json({ error: 'Username already taken' });
         }
 
         return UsersService.hashPassword(password)
-          .then(hashedPassword => {
+          .then((hashedPassword) => {
             const newUser = {
               user_name,
               password: hashedPassword,
@@ -47,7 +47,7 @@ usersRouter
               req.app.get('db'),
               newUser,
             )
-              .then(user => {
+              .then((user) => {
                 res
                   .status(201)
                   .location(path.posix.join(req.originalUrl, `/${user.id}`))
@@ -58,8 +58,6 @@ usersRouter
       .catch(next);
   })
 
-  .get(requireAuth, (req, res, next) => {
-    return res.json(UsersService.serializeUser(req.user));
-  });
+  .get(requireAuth, (req, res, next) => res.json(UsersService.serializeUser(req.user)));
 
 module.exports = usersRouter;

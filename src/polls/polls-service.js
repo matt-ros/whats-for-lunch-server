@@ -46,6 +46,6 @@ const PollsService = {
   serializePolls(polls) {
     return polls.map(this.serializePoll);
   },
-}
+};
 
 module.exports = PollsService;

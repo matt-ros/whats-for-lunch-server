@@ -14,7 +14,7 @@ pollItemsRouter
       req.app.get('db'),
       req.params.poll_id,
     )
-      .then(items => {
+      .then((items) => {
         res.json(PollItemsService.serializeItems(items));
       })
       .catch(next);
@@ -23,10 +23,12 @@ pollItemsRouter
   .post(checkIfLoggedIn, checkPollBelongsToUser, jsonBodyParser, (req, res, next) => {
     const newItems = req.body;
     for (let i = 0; i < newItems.length; i++) {
-      const { item_name, item_address, item_cuisine, item_link, item_votes } = newItems[i];
+      const {
+        item_name, item_address, item_cuisine, item_link, item_votes,
+      } = newItems[i];
       if (!item_name) {
         return res.status(400).json({
-          error: `Missing 'item_name' in request body`
+          error: 'Missing \'item_name\' in request body',
         });
       }
 
@@ -35,11 +37,11 @@ pollItemsRouter
           new URL(newItems[i].item_link).toString();
         } catch (error) {
           return res.status(400).json({
-            error: 'Link is not a valid URL'
+            error: 'Link is not a valid URL',
           });
         }
       }
-  
+
       const newItem = {
         item_name,
         item_address,
@@ -57,7 +59,7 @@ pollItemsRouter
       req.app.get('db'),
       newItems,
     )
-      .then(item => {
+      .then((item) => {
         res
           .status(201)
           .location(path.posix.join(req.originalUrl, `/${item.id}`))
@@ -122,7 +124,7 @@ async function checkItemExists(req, res, next) {
 
     if (!item) {
       return res.status(404).json({
-        error: `Item doesn't exist`
+        error: 'Item doesn\'t exist',
       });
     }
 
@@ -143,13 +145,13 @@ async function checkPollBelongsToUser(req, res, next) {
 
     if (!poll) {
       return res.status(404).json({
-        error: `Poll doesn't exist`
+        error: 'Poll doesn\'t exist',
       });
     }
 
     if (poll.user_id !== req.user.id) {
       return res.status(403).json({
-        error: 'Poll belongs to a different user'
+        error: 'Poll belongs to a different user',
       });
     }
 

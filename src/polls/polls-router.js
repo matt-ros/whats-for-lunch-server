@@ -13,7 +13,7 @@ pollsRouter
       req.app.get('db'),
       req.user.id,
     )
-      .then(polls => {
+      .then((polls) => {
         res.json(PollsService.serializePolls(polls));
       })
       .catch(next);
@@ -23,7 +23,7 @@ pollsRouter
     const { poll_name, end_time } = req.body;
     if (!end_time) {
       return res.status(400).json({
-        error: `Missing 'end_time' in request body`
+        error: 'Missing \'end_time\' in request body',
       });
     }
 
@@ -38,7 +38,7 @@ pollsRouter
       req.app.get('db'),
       newPoll,
     )
-      .then(poll => {
+      .then((poll) => {
         res
           .status(201)
           .location(path.posix.join(req.originalUrl, `/${poll.id}`))
@@ -59,7 +59,7 @@ pollsRouter
     const numFields = Object.values(updateFields).filter(Boolean).length;
     if (numFields === 0) {
       return res.status(400).json({
-        error: `Request body must contain 'poll_name' or 'end_time'`
+        error: 'Request body must contain \'poll_name\' or \'end_time\'',
       });
     }
 
@@ -94,7 +94,7 @@ async function checkPollExists(req, res, next) {
 
     if (!poll) {
       return res.status(404).json({
-        error: `Poll doesn't exist`
+        error: 'Poll doesn\'t exist',
       });
     }
 
@@ -108,7 +108,7 @@ async function checkPollExists(req, res, next) {
 async function checkPollBelongsToUser(req, res, next) {
   if (res.poll.user_id !== req.user.id) {
     return res.status(403).json({
-      error: 'Poll belongs to a different user'
+      error: 'Poll belongs to a different user',
     });
   }
   next();

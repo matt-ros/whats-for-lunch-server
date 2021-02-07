@@ -14,7 +14,7 @@ const app = express();
 const morganOption = NODE_ENV === 'production' ? 'tiny' : 'dev';
 
 app.use(morgan(morganOption, {
-  skip: () => NODE_ENV === 'test'
+  skip: () => NODE_ENV === 'test',
 }));
 
 app.use(helmet());
@@ -22,7 +22,7 @@ app.use(helmet());
 app.use(
   cors({
     origin: CLIENT_ORIGIN,
-  })
+  }),
 );
 
 app.use('/api/auth', authRouter);
@@ -30,7 +30,7 @@ app.use('/api/users', usersRouter);
 app.use('/api/polls', pollsRouter);
 app.use('/api/items', pollItemsRouter);
 
-app.use(function errorHandler(error, req, res, next) {
+app.use((error, req, res, next) => {
   let response;
   if (NODE_ENV === 'production') {
     response = { error: { message: 'server error' } };

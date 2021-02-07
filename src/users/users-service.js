@@ -8,7 +8,7 @@ const UsersService = {
     return db('whatsforlunch_users')
       .where({ user_name })
       .first()
-      .then(user => !!user);
+      .then((user) => !!user);
   },
 
   getUserById(db, id) {
@@ -48,7 +48,7 @@ const UsersService = {
   hashPassword(password) {
     return bcrypt.hash(password, 12);
   },
-  
+
   serializeUser(user) {
     return {
       id: user.id,
@@ -57,6 +57,6 @@ const UsersService = {
       date_created: new Date(user.date_created),
     };
   },
-}
+};
 
 module.exports = UsersService;

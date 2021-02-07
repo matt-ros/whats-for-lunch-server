@@ -54,6 +54,6 @@ const PollItemsService = {
   serializeItems(items) {
     return items.map(this.serializeItem);
   },
-}
+};
 
 module.exports = PollItemsService;
