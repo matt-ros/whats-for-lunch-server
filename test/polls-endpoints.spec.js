@@ -1,3 +1,4 @@
+const { expect } = require('chai');
 const knex = require('knex');
 const app = require('../src/app');
 const helpers = require('./test-helpers');
@@ -8,6 +9,7 @@ describe('Polls Endpoints', () => {
   const {
     testUsers,
     testPolls,
+    testPollItems,
   } = helpers.makeWhatsForLunchFixtures();
 
   before('make knex instance', () => {
@@ -82,9 +84,9 @@ describe('Polls Endpoints', () => {
   });
 
   describe('POST /api/polls', () => {
-    beforeEach('insert users', () => helpers.seedUsers(db, testUsers));
+    context('Unhappy polls', () => {
+      beforeEach('insert users', () => helpers.seedUsers(db, testUsers));
 
-    context('Unhappy path', () => {
       it(`responds with 400 when 'end_time' is missing`, () => {
         const newPollMissingTime = {
           ...testPolls[0],
@@ -94,38 +96,118 @@ describe('Polls Endpoints', () => {
         return supertest(app)
           .post('/api/polls')
           .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
-          .send(newPollMissingTime)
+          .send({ poll: newPollMissingTime, items: [] })
           .expect(400, { error: `Missing 'end_time' in request body` });
       });
     });
 
+    context('Unhappy items', () => {
+      beforeEach('seed other tables', () => helpers.seedWhatsForLunchTables(db, testUsers, testPolls));
+
+      it(`responds with 400 when 'item_name' is missing`, () => {
+        const newItemMissingName = {
+          ...testPollItems[0],
+          item_name: null
+        };
+
+        return supertest(app)
+          .post('/api/polls')
+          .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
+          .send({ poll: testPolls[0], newItems: [newItemMissingName] })
+          .expect(400, { error: `Missing 'item_name' in request body` });
+      });
+
+      it(`responds with 400 when 'item_link' is not a valid URL`, () => {
+        const itemInvalidLink = {
+          ...testPollItems[0],
+          item_link: 'invalid.com'
+        };
+
+        return supertest(app)
+          .post('/api/polls')
+          .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
+          .send({ poll: testPolls[0], newItems: [itemInvalidLink] })
+          .expect(400, { error: 'Link is not a valid URL' });
+      });
+    });
+
     context('Happy path', () => {
-      it('responds 201, serialized poll', () => {
+      it('responds 201, serialized poll and items', () => {
         const newPoll = {
           poll_name: 'test poll_name',
           end_time: '2029-01-22T16:28:32.615Z'
         };
 
+        const newItems = [
+          {
+            item_name: 'test item name 1',
+            item_address: 'test item address 1',
+            item_cuisine: 'test item cuisine 1',
+            item_link: 'http://example.com',
+          },
+
+          {
+            item_name: 'test item name 2',
+            item_address: 'test item address 2',
+            item_cuisine: 'test item cuisine 2',
+            item_link: 'http://example.com',
+          },
+        ];
+
         return supertest(app)
           .post('/api/polls')
-          .send(newPoll)
+          .send({ newItems, poll: newPoll, })
           .expect(201)
           .expect(res => {
-            expect(res.body).to.have.property('id');
-            expect(res.body.poll_name).to.eql(newPoll.poll_name);
-            expect(res.body.user_id).to.be.null;
+            const { poll, items } = res.body;
+            expect(poll).to.have.property('id');
+            expect(poll.poll_name).to.eql(newPoll.poll_name);
+            expect(poll.user_id).to.be.null;
             const expectedEndTime = new Date(newPoll.end_time).toLocaleString();
-            const actualEndTime = new Date(res.body.end_time).toLocaleString();
+            const actualEndTime = new Date(poll.end_time).toLocaleString();
             expect(actualEndTime).to.eql(expectedEndTime);
             const expectedDateCreated = new Date().toLocaleString();
-            const actualDateCreated = new Date(res.body.date_created).toLocaleString();
+            const actualDateCreated = new Date(poll.date_created).toLocaleString();
             expect(actualDateCreated).to.eql(expectedDateCreated);
+            for (let i = 0; i < items.length; i++) {
+              expect(items[i]).to.have.property('id');
+              expect(items[i].item_name).to.eql(newItems[i].item_name);
+              expect(items[i].item_address).to.eql(newItems[i].item_address);
+              expect(items[i].item_cuisine).to.eql(newItems[i].item_cuisine);
+              expect(items[i].item_link).to.eql(newItems[i].item_link);
+              expect(items[i].item_votes).to.eql(0);
+              expect(items[i].poll_id).to.eql(poll.id);
+              const expectedDateCreated = new Date().toLocaleString();
+              const actualDateCreated = new Date(items[i].date_created).toLocaleString();
+              expect(actualDateCreated).to.eql(expectedDateCreated);            
+            }
+          })
+          .expect(res => {
+            const { items } = res.body;
+            for (let i = 0; i < items.length; i++) {
+              db
+                .from('whatsforlunch_poll_items')
+                .select('*')
+                .where({ id: items[i].id })
+                .first()
+                .then(row => {
+                  expect(row.item_name).to.eql(newItems[i].item_name);
+                  expect(row.item_address).to.eql(newItems[i].item_address);
+                  expect(row.item_cuisine).to.eql(newItems[i].item_cuisine);
+                  expect(row.item_link).to.eql(newItems[i].item_link);
+                  expect(row.item_votes).to.eql(0);
+                  expect(row.poll_id).to.eql(res.body.poll.id);
+                  const expectedDBDateCreated = new Date().toLocaleString();
+                  const actualDBDateCreated = new Date(row.date_created).toLocaleString();
+                  expect(actualDBDateCreated).to.eql(expectedDBDateCreated);
+                });
+            }
           })
           .expect(res =>
             db
               .from('whatsforlunch_polls')  
               .select('*')
-              .where({ id: res.body.id })
+              .where({ id: res.body.poll.id })
               .first()
               .then(row => {
                 expect(row.poll_name).to.eql(newPoll.poll_name);
@@ -160,30 +242,41 @@ describe('Polls Endpoints', () => {
           db,
           testUsers,
           testPolls,
+          testPollItems,
         )
       );
 
-      it('responds with 200 and the specified poll', () => {
+      it('responds with 200 and the specified poll and items', () => {
         const pollId = 1;
         const expectedPoll = testPolls[pollId - 1];
+        const expectedItems = testPollItems.filter(item => item.poll_id === pollId);
         return supertest(app)
           .get(`/api/polls/${pollId}`)
-          .expect(200, expectedPoll);
+          .expect(200, {
+            poll: expectedPoll,
+            items: expectedItems,
+          });
       });
     });
 
-    context('Given poll with XSS attack content', () => {
+    context('Given poll and item with XSS attack content', () => {
       const testUser = testUsers[0];
       const {
         maliciousPoll,
         expectedPoll,
       } = helpers.makeMaliciousPoll(testUser);
 
-      beforeEach('insert malicious poll', () => {
-        return helpers.seedMaliciousPoll(
+      const {
+        maliciousPollItem,
+        expectedPollItem,
+      } = helpers.makeMaliciousPollItem(maliciousPoll);
+
+      beforeEach('insert malicious poll and item', () => {
+        return helpers.seedMaliciousPollItem(
           db,
           testUser,
           maliciousPoll,
+          maliciousPollItem,
         );
       });
 
@@ -192,7 +285,11 @@ describe('Polls Endpoints', () => {
           .get(`/api/polls/${maliciousPoll.id}`)
           .expect(200)
           .expect(res => {
-            expect(res.body.poll_name).to.eql(expectedPoll.poll_name);
+            expect(res.body.poll.poll_name).to.eql(expectedPoll.poll_name);
+            expect(res.body.items[0].item_name).to.eql(expectedPollItem.item_name);
+            expect(res.body.items[0].item_address).to.eql(expectedPollItem.item_address);
+            expect(res.body.items[0].item_cuisine).to.eql(expectedPollItem.item_cuisine);
+            expect(res.body.items[0].item_link).to.eql(expectedPollItem.item_link);
           });
       });
     });
@@ -217,10 +314,11 @@ describe('Polls Endpoints', () => {
           db,
           testUsers,
           testPolls,
+          testPollItems,
         )
       );
 
-      it('responds 204 and updates poll', () => {
+      it('responds 204 and updates poll and resets votes', () => {
         const pollToUpdate = testPolls[0];
         const updateFields = {
           poll_name: 'updated poll name',
@@ -241,7 +339,13 @@ describe('Polls Endpoints', () => {
             supertest(app)
               .get(`/api/polls/${pollToUpdate.id}`)
               .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
-              .expect(expectedPoll)
+              .expect(res => {
+                const { poll, items } = res.body;
+                expect(poll).to.eql(expectedPoll);
+                items.forEach(item => {
+                  expect(item.item_votes).to.eql(0);
+                });
+              })
           );
       });
 
@@ -275,6 +379,17 @@ describe('Polls Endpoints', () => {
           ...updateFields,
         };
 
+        const expectedItems = (
+          testPollItems
+            .filter(item => item.poll_id === pollToUpdate.id)
+            .map(item => {
+              return {
+                ...item,
+                item_votes: 0,
+              };
+            })
+        );
+
         return supertest(app)
           .patch(`/api/polls/${pollToUpdate.id}`)
           .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
@@ -287,7 +402,7 @@ describe('Polls Endpoints', () => {
             supertest(app)  
               .get(`/api/polls/${pollToUpdate.id}`)
               .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
-              .expect(expectedPoll)
+              .expect({ poll: expectedPoll, items: expectedItems })
           );
       });
     });

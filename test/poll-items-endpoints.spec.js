@@ -26,67 +26,6 @@ describe('Poll Items Endpoints', () => {
 
   afterEach('cleanup', () => helpers.cleanTables(db));
 
-  describe('GET /api/items/poll/:poll_id', () => {
-    context('Given no items', () => {
-      beforeEach('seed other tables', () => helpers.seedWhatsForLunchTables(db, testUsers, testPolls));
-
-      it('responds with 200 and an empty list', () => {
-        const pollId = testPolls[0].id;
-        return supertest(app)
-          .get(`/api/items/poll/${pollId}`)
-          .expect(200, []);
-      });
-    });
-
-    context('Given there are items in the database', () => {
-      beforeEach('seed tables', () =>
-        helpers.seedWhatsForLunchTables(
-          db,
-          testUsers,
-          testPolls,
-          testPollItems,
-        )
-      );
-
-      it('responds with 200 and items for the requested poll', () => {
-        const expectedItems = testPollItems.filter(item => item.poll_id === testPolls[0].id);
-        return supertest(app)
-          .get(`/api/items/poll/${testPolls[0].id}`)
-          .expect(200, expectedItems);
-      });
-    });
-
-    context('Given an item with XSS content', () => {
-      const testUser = testUsers[0];
-      const testPoll = testPolls[0];
-      const {
-        maliciousPollItem,
-        expectedPollItem,
-      } = helpers.makeMaliciousPollItem(testPoll);
-
-      beforeEach('insert malicious item', () => {
-        return helpers.seedMaliciousPollItem(
-          db,
-          testUser,
-          testPoll,
-          maliciousPollItem,
-        );
-      });
-
-      it('removes XSS attack content', () => {
-        return supertest(app)
-          .get(`/api/items/poll/${testPoll.id}`)
-          .expect(200)
-          .expect(res => {
-            expect(res.body[0].item_name).to.eql(expectedPollItem.item_name);
-            expect(res.body[0].item_address).to.eql(expectedPollItem.item_address);
-            expect(res.body[0].item_cuisine).to.eql(expectedPollItem.item_cuisine);
-            expect(res.body[0].item_link).to.eql(expectedPollItem.item_link);
-          });
-      });
-    });
-  });
-
   describe('POST /api/items/poll/:poll_id', () => {
     beforeEach('seed other tables', () => helpers.seedWhatsForLunchTables(db, testUsers, testPolls));
 
@@ -226,9 +165,9 @@ describe('Poll Items Endpoints', () => {
           .expect(204)
           .then(res =>
             supertest(app)
-              .get(`/api/items/poll/${poll.id}`)
+              .get(`/api/polls/${poll.id}`)
               .set('Authorization', helpers.makeAuthHeader(user))
-              .expect(expectedItems)
+              .expect({ poll, items: expectedItems})
           );
       });
 
@@ -277,54 +216,11 @@ describe('Poll Items Endpoints', () => {
           .expect(204)
           .then(res =>
             supertest(app)
-              .get(`/api/items/poll/${itemToVote.poll_id}`)
+              .get(`/api/polls/${itemToVote.poll_id}`)
               .expect(res => {
-                const item = res.body.find(item => item.id === itemToVote.id);
+                const item = res.body.items.find(item => item.id === itemToVote.id);
                 expect(item).to.eql(expectedItem);
               })
-          );
-      });
-    });
-  });
-
-  describe('PATCH /api/items/resetVotes/:poll_id', () => {
-    context('Given no polls', () => {
-      beforeEach('insert users', () => helpers.seedUsers(db, testUsers));
-
-      it('responds with 404', () => {
-        const pollId = 123456;
-        return supertest(app)
-          .patch(`/api/items/resetVotes/${pollId}`)
-          .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
-          .expect(404, { error: `Poll doesn't exist` })
-      });
-    });
-
-    context('Given there are polls in the database', () => {
-      beforeEach('seed tables', () =>
-        helpers.seedWhatsForLunchTables(
-          db,
-          testUsers,
-          testPolls,
-          testPollItems,
-        )
-      );
-
-      it('responds 204 and resets vote counts', () => {
-        const idToUpdate = testPolls[0].id;
-        const user = testUsers.find(user => user.id === testPolls[0].user_id);
-        return supertest(app)
-          .patch(`/api/items/resetVotes/${idToUpdate}`)
-          .set('Authorization', helpers.makeAuthHeader(user))
-          .expect(204)
-          .then(res =>
-            supertest(app)
-            .get(`/api/items/poll/${idToUpdate}`)
-            .expect(res => {
-              res.body.forEach(item => {
-                expect(item.item_votes).to.eql(0);
-              });
-            })
           );
       });
     });

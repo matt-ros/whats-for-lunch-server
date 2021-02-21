@@ -9,17 +9,6 @@ const jsonBodyParser = express.json();
 
 pollItemsRouter
   .route('/poll/:poll_id')
-  .get((req, res, next) => {
-    PollItemsService.getAllItemsByPollId(
-      req.app.get('db'),
-      req.params.poll_id,
-    )
-      .then((items) => {
-        res.json(PollItemsService.serializeItems(items));
-      })
-      .catch(next);
-  })
-
   .post(checkIfLoggedIn, checkPollBelongsToUser, jsonBodyParser, (req, res, next) => {
     const newItems = req.body;
     for (let i = 0; i < newItems.length; i++) {
@@ -95,19 +84,6 @@ pollItemsRouter
       req.app.get('db'),
       req.params.id,
       updateFields,
-    )
-      .then(() => {
-        res.status(204).end();
-      })
-      .catch(next);
-  });
-
-pollItemsRouter
-  .route('/resetVotes/:poll_id')
-  .patch(requireAuth, checkPollBelongsToUser, (req, res, next) => {
-    PollItemsService.resetVotesByPollId(
-      req.app.get('db'),
-      req.params.poll_id,
     )
       .then(() => {
         res.status(204).end();
